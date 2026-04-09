@@ -1,0 +1,103 @@
+/* 
+ Problem 3 : Find out the customer_status of which customers are active and who have churned(i.e non active) :- 
+ - On the basis of how their last_purchase_date compares with the last_purchase_date of the entire sales data/cohort_analysis view(since the values are retrieved from the sales table itself for this).
+ - Firstly in a seperate query we will find out the MAX of orderdate across all of sales table to understand what was the last known orderdate in which an order/orders were placed.
+ - After making note of the last known orderdate of the sales data, we will create a CTE called customer_date_info(cdi) wherein we will find the last_purchase_date of individual customers alongside the general info of customers from the cohort_analysis view based on their cohort groups of customerkey & their orderdate.
+ - Then we will create a second CTE called customer_status_info where we will find the customer-info retrieved in prevoius cdi CTE's corresponding customer_status for each customer.
+ 	* Active - For all customers who have made a sale(having their last_purchase_date) within last 6 months from the last_purchase_date of the entire sales data.
+ 	* Churned - For all customers who have not made a sale(i.e not having their last_purchase_date) within last 6 months from the last_purchase_date of the entire sales data.
+ - Then in the main query we will display the result GROUPED on the basis of each customer_status, and find their corresponding SUM of all the total_net_revenues generated of the cohort group(of customerkeys and their orderdates) having the customerkeys falling under the mentioned/grouped customer_status, 
+ and also finding the percentage distribution that each of these customer_segment's SUM of total_net_revenue makes up of the SUM of tootal_net_revenue of all the sales/cohort groups combined of chort_analysis View.
+*/
+
+/* This query is to understand the last_purchase_date or last orderdate overall in our sales data, since this is the basis of which we will be assigning customer_status to each customer,
+since calculating the 6 month interval before the current date wont give us exact results we are looking for and will result all of the customers as churned , 
+since the data is not real-time, and the last date of purchase date was in 2024, and in current year of 2026 every customer will turn out churned(since none of the customer's last_purchase_date will be in the span of 6 months before the current date). */
+SELECT 
+	MAX(orderdate)
+FROM sales;
+
+/* The main query to find the last_purchase_date of individual customers and classify which customer are falling within the category of Active and churned based on their last_purchase_dates compared with the last_purchase_date overall of the entire data in sales :-
+- I.e if last_purchase_date of the customer lies between the period of 6 months interval before the last_purchase_date of overall sales data , then they wil be classified as 'Actuve' customers.
+- Or if the last_purchase_date of the customer dosent lie between the period of 6 months interval before last_purchase_date of overall sales data, i.e is older than the date which is 6 months before the last_purchase_date of overall sales data , then it will be classified as 'Churned' customer. */
+
+WITH customer_date_info AS ( -- In this CTE we will find out last_purchase_date of each of the customer mentioned in cohort_analysis view.
+SELECT
+	customerkey,
+	orderdate,
+	clean_name,
+	total_net_revenue, -- for the customers on their corresponding orderdates.
+	cohort_year,
+	first_purchase_date,
+	MAX(orderdate) OVER (PARTITION BY customerkey) AS last_purchase_date -- since from the individual rows of result-set of cohort_analysis, we want the maximum/last orderdate for each customerkey from the distinct cohort_groups formed of customer and their orderdates in cohort_analysis view.
+FROM
+	cohort_analysis
+), customer_status_info AS ( -- we created this 2nd CTE to find out the customer_status of each of those cuustomers from customer_analysis view whose last_purchase_date we recently found out, and on the basis of their last_purchase_date of each customer compared to the last_purchase_date overall of the entire sales data, we are going to assign customer statuses of Active and Churned to each customer.
+SELECT 
+	cdi.*,
+	CASE
+		WHEN last_purchase_date > (SELECT MAX(orderdate) FROM sales) - INTERVAL '6 Months' THEN 'Active' -- i.e when the last_purchase_date of a customer stays more/greater than the date resulted after subtracting the last_date in the data overall with the no. of days in 6 months interval, i.e if the last_purchase_date of the customer is within the period of 6 months before the last_purchase_date of the data overal, then the customer will be classified as 'Active'.
+		ELSE 'Churned'
+	END AS customer_status
+FROM 
+	customer_date_info cdi
+WHERE -- Makes sure that the customer(from each of the cohort groups of cohort_analysis view) in question are having their first_purchase_date before the period of 6 months from/before the last_purchase_date of all the sales combined, to ensure the customer is a regular customer and not a one time purchaser who has been categorized as an active customer just because of one purchase they made in the active time-period i.e(6 months from the last ever purchase date of all sales). Only after ensuring this criteria is fullfilled will the customerkey(in cohort groups) will be alloted a customer_status, i.e the customerkey should have their first_purchase_date < '2023-10-20'(i.e 6 months before the last ever purchase date of all sales combined which was on 2024-04-20), for all these cohort groups containing these customers fullfiliing these condition, their total_net_revenue will be summed up corresponding to their customer_status group in the main query.
+	first_purchase_date < (SELECT MAX(orderdate) FROM sales) - INTERVAL'6 months' 
+)
+SELECT -- In the CTE we are going to distribute the entire data retrieved from the previous CTE of csi(which further pulled info out of the 1st CTE of cdi) GROUPED on the basis of their customer_statuses, to find the SUM of total_net_revenue of cohort groups(of customers and their orderdates from the cohort_analysis view) belonging to the customers falling under that customer_status on the basis of which we grouped it by, and also find the percentage the sum of total_net_revenue of each of these customers within each customer_status group make up of the whole SUM of total_net_revenues of the entire sales data. Only those cohort_groups will be included whose customerkey's first_purchase_date < '2023-10-20'(i.e 6 months before the last ever purchase date of all sales combined which was on 2024-04-20).
+	csi.customer_status,
+	SUM(total_net_revenue) AS revenue_of_customer_status, -- will find the SUM of total_net_revenue of each cohort groups of customerkeys and their orderdates , for all the total_net_revenue cohort groups having the customerkeys which fall within the category mentioned in the customer_status group.
+	(SUM(total_net_revenue) / (SELECT SUM(total_net_revenue) FROM cohort_analysis)) * 100 AS percentage_of_customer_status_to_total_revenue_overall -- will find the percentage the SUM of total_net_revenues of each cohort groups of customerkeys and their orderdates for the customers falling under the mentioned category of custumer_staus makes up out of the SUM of all the total_net_revenues of all cohort groups i.e customers and their orderdates combined in the view of cohort_analysis.
+FROM
+	customer_status_info csi
+GROUP BY
+	customer_status;
+
+----------------------------------------------------------------------------------
+
+/* In this query we are going to find out the new cohort of cohorot_year-wise distribution of active and churned customers, finding their SUM of total_net_revenue & count of distinct customers of cohort groups(from cohort_analysis, ) leveraging the CTEs created in previous query , but with a different main query where we will make newer cohort_groups of cohort_years and their customer_statuses, then find the total & percentages of the total_net_revenue of all these previous cohorts(of customer & their orderdates) falling under the category of the new cohort group of cohort_year and customer_status make up to the the total_net_revenuue(of cohort groups from cohort_analysis view) whose customers are falling under the cateory of that particular cohort_year, 
+   similarly also finding the count of distinct customers falling within the same cohort_year and customer_status and at the same time finding what percentage this new cohort_group's(cohort_year and its corresponding status's) count of customer makes up to the total of all the customers within that cohort_year combined(combining both the customer_statuses count of customers). */
+
+WITH customer_date_info AS ( -- In this CTE we will find out last_purchase_date of each of the customer mentioned in cohort_analysis view.
+SELECT
+	customerkey,
+	orderdate,
+	clean_name,
+	total_net_revenue, -- for the customers on their corresponding orderdates.
+	cohort_year,
+	first_purchase_date,
+	MAX(orderdate) OVER (PARTITION BY customerkey) AS last_purchase_date -- since from the individual rows of result-set of cohort_analysis, we want the maximum/last orderdate for each customerkey from the distinct cohort_groups formed of customer and their orderdates in cohort_analysis view.
+FROM
+	cohort_analysis ca
+), customer_status_info AS ( -- we created this 2nd CTE to find out the customer_status of each of those cuustomers from customer_analysis view whose last_purchase_date we recently found out, and on the basis of their last_purchase_date of each customer compared to the last_purchase_date overall of the entire sales data, we are going to assign customer statuses of Active and Churned to each customer.
+SELECT 
+	cdi.*,
+	CASE
+		WHEN last_purchase_date > (SELECT MAX(orderdate) FROM sales) - INTERVAL '6 Months' THEN 'Active' -- i.e when the last_purchase_date of a customer stays more/greater than the date resulted after subtracting the last_date in the data overall with the no. of days in 6 months interval, i.e if the last_purchase_date of the customer is within the period of 6 months before the last_purchase_date of the data overal, then the customer will be classified as 'Active'.
+		ELSE 'Churned'
+	END AS customer_status
+FROM 
+	customer_date_info cdi
+WHERE -- Makes sure that the customer(from each of the cohort groups of cohort_analysis view) in question are having their first_purchase_date before the period of 6 months from/before the last_purchase_date of all the sales combined, to ensure the customer is a regular customer and not a one time purchaser who has been categorized as an active customer just because of one purchase they made in the active time-period i.e(6 months from the last ever purchase date of all sales). Only after ensuring this criteria is fullfilled will the customerkey(in cohort groups) will be alloted a customer_status, i.e the customerkey should have their first_purchase_date < '2023-10-20'(i.e 6 months before the last ever purchase date of all sales combined which was on 2024-04-20), for all these cohort groups containing these customers fullfiliing these condition, their total_net_revenue will be summed up corresponding to their customer_status group in the main query.
+	first_purchase_date < (SELECT MAX(orderdate) FROM sales) - INTERVAL'6 months'
+)
+SELECT
+	cohort_year,
+	customer_status,
+	SUM(total_net_revenue) AS cohort_year_status_revenue, -- will find the sum of all the total_net_revenues of all the cohort_groups(of customerkeys and orderdates) who's customer falls under the category the mentioned GROUPED cohort_year and for the mentioned GROUPED customer_status. i.e having the mentioned cohort_year and customer_status as mentioned in the new cohort_groups according to this query(formed of cohort_years and the customer_statuses).
+	COUNT(DISTINCT customerkey) AS customer_count_for_cohort_year_and_status,
+	SUM(total_net_revenue) / SUM(SUM(total_net_revenue)) OVER(PARTITION BY cohort_year) * 100 AS percentage_revenue_of_status_with_cohort_year_revenue, -- will find the percentage that the customer_status's revenue on that cohort_year makes up of total revenue generated by customers of that cohort_year(SUM of total_net_revenue of all the cohort_groups[having customers falling within that cohort_year] from cohort_analysis view).
+	COUNT(DISTINCT customerkey) / (SUM(COUNT(DISTINCT customerkey)) OVER(PARTITION BY cohort_year)) * 100 AS percentage_customers_cohort_year_status_with_total_customers_cohort_year -- will find the percentage of what the count of customers in that customer_status of that cohort_year make up to the total no. of customers in that cohort_year.
+FROM
+	customer_status_info csi
+GROUP BY
+	cohort_year,
+	customer_status
+ORDER BY
+	cohort_year,
+	customer_status;
+
+/* In the dividend/first part of percentage_revenue_of_status_with_cohort_year_revenue entity we called out the SUM(total_net_revenue) of all the cohort groups(of customers and their orderdates from cohort_analysis view) based on their corresponding customer's cohort_year and their customer_status(i.e newer cohorts), it will result us the entire distribution of cohort_year_status_revenue for each cohort_year for their corresponding customer_status...,
+ then we divide it with the divisor/second part of "SUM(SUM(total_net_revenue)) OVER(PARTITION BY cohort_year)" where the inner part of SUM(total_net_revenue) will basically show us the same distribution of sum of all the total_net_revenues aggregated on the basis of their new cohort_groups i.e cohort_year & customer_status since thats what we mentioned in GROUP BY clause. 
+ Then the outter SUM(...) OVER(PARTITION BY cohort_year) will basically find the sum of all the total_net_revenues distributed corresponding to the cohort_year and their customer_status into one sum for each cohort_year(i.e combine the sum(total_net_revenue) of each customer_status of that cohort_year into one for that cohort_year).
+ Same is the case with COUNT() done in entity of percentage_customers_cohort_year_status_with_total_customers_cohort_year, but the only difference is that once we find out the Count_of customers distribution for each costumer_status for their cohort_year , we will use the outter SUM(...) OVER(PARTITION BY cohort_year), to find the sum of the count of all the distinct customers falling under that cohort_year, and divide it with the count of customers of that customer_status of that cohort_year and, multiply the whole with 100 to find their percentage... */
