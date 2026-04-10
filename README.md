@@ -49,8 +49,7 @@ The dataset was loaded using a `.sql` file containing:
 - Data insert statements  
 - Constraints and configurations  
 
-📥 **Dataset Source:**  
-https://github.com/lukebarousse/Int_SQL_Data_Analytics_Course/releases/tag/v.0.0.0
+📥 **Dataset Source:**  https://github.com/lukebarousse/Int_SQL_Data_Analytics_Course/releases/tag/v.0.0.0
 
 Once executed, this file automatically:
 
@@ -214,6 +213,17 @@ last_purchase_date[of customer] vs MAX(orderdate)[last_purchase_date_overall]
 **Introduce:**
 - Loyalty programs  
 - Follow-up campaigns  
+
+---
+
+### 📉 Improve Low-Value Customer Contribution
+- Enhance purchasing experience for low-value customers to increase their engagement and spending  
+
+**Focus Areas:**
+- Simplify checkout and reduce friction  
+- Provide targeted discounts or bundles for low-spend users  
+- Use personalized recommendations to encourage repeat purchases  
+- Introduce entry-level loyalty incentives to gradually increase LTV  
 
 ---
 
