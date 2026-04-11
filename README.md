@@ -42,7 +42,7 @@ CREATE DATABASE contoso_100k;
 ```
 ### ⚙️ Step 2: Load Dataset
 
-The dataset was loaded using a `.sql` file containing:
+The dataset was loaded using `contoso_100k.sql`(in the main project folder) file containing:
 
 - Table creation scripts  
 - Schema definitions  
