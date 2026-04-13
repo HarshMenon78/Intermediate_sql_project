@@ -123,6 +123,11 @@ Which customers are active vs churned, and how does their revenue contribution d
 
 ---
 
+### 🔹 Problem 4: Segment Status Analysis
+How do customer segments perform in terms of status (active vs churned), and what are the performance metrics for each segment?
+
+---
+
 ## 🧠 Analysis Approach
 
 ### 🔹LTV-Based Customer Segmentation
@@ -138,6 +143,8 @@ Which customers are active vs churned, and how does their revenue contribution d
 **Analysis Performed:**
 - Revenue contribution by segment  
 - Percentage share of total revenue  
+
+**Query :** [1_customer_segmentation.sql](Scripts/1_customer_segmentation.sql)
 
 📊 **Visualization 1:**  
 ![Customer Segmentation](images/1_customer_segmentation.png)
@@ -162,6 +169,8 @@ orderdate - first_purchase_date AS days_since_first_purchase
 - Average revenue per customer
 - For the `first_purchase_date`
 
+**Query :** [2_customer_group_revenue_analysis.sql](Scripts/2_customer_group_revenue_analysis.sql)
+
 📊 **Visualization 2:**  
 ![Customer Group Revenue Analysis](images/2_customer_group_revenue_analysis.png)
 
@@ -182,10 +191,35 @@ last_purchase_date[of customer] vs MAX(orderdate)[last_purchase_date_overall]
 - Cohort-wise churn distribution  
 - Customer count percentages  
 
+**Query :** [3_customer_churn_analysis.sql](Scripts/3_customer_churn_analysis.sql)
+
 📊 **Visualization 3:**  
 ![Customer Churn Analysis - Overall Sales Data](images/3_customer_churn_analysis(for%20overall%20sales%20data).png)
 
 ![Customer Churn Analysis - Cohort Year & Status Distribution](images/3_customer_churn_analysis(cohort_year%20%26%20status%20wise%20distribution).png)
+
+---
+
+### 🔹Segment Status Analysis
+
+**Combined Analysis:**
+- Integrated customer segmentation (LTV-based) with churn status  
+- Analyzed performance metrics across segments and statuses  
+
+**Key Metrics Calculated:**
+- Customer count by segment and status  
+- Revenue contribution by segment and status  
+- Percentage distribution within segments  
+
+**Analysis Performed:**
+- Distribution of active vs churned customers across LTV segments  
+- Revenue performance indicators for each segment-status combination  
+- Identification of high-performing segments based on activity levels  
+
+**Query :** [4_segment_status_analysis.sql](Scripts/4_segment_status_analysis.sql)
+
+📊 **Visualization 4:**  
+![Segment Status Analysis](images/4_segment_status_analysis.png)
 
 ---
 

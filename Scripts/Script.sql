@@ -99,7 +99,7 @@ SELECT * FROM sales;
 	-- 1) For better query execution and runtime optimization , dont use 'SELECT *', rather use 'SELECT column/entity_name, ...', this will help in parsing lesser rows and hence executing this data will be easier and faster.
 	EXPLAIN ANALYZE -------------|
 	SELECT * FROM sales; --      | 
-						 --		 |-- The difference stays on the favour of the first query even though it used SELECT * while the 2nd one didn't, thats because in both cases all the rows were parsed using Seq Scan and in one all the column values for all the rows were retrieved , while for the second one only one column's values for all rows were retrieved. But not using 'SELECT *' and using 'SELECT column/entity_name' will show a crucial difference if it was a Index scan proving retrieving all column's values will take longer execution times.
+						 --		 |-- The difference stays on the favour of the first query even though it used SELECT * while the 2nd one didn't, thats because in both cases all the rows were parsed using Seq Scan and in one all the column values for all the rows were retrieved , while for the second one only one column's values for all rows were retrieved. But not using 'SELECT *' and using 'SELECT column/entity_name' will show a crucial difference if it was a Index scan proving retrieving all column's values will take longer execution times compared to an index already existing in a column value.
 	EXPLAIN ANALYZE--------------|
 	SELECT customerkey
 	FROM sales;

@@ -1,0 +1,7 @@
+"ltv_segment","status","customer_count_of_the_segment_for_status","revenue_of_segment_by_status","percentage_of_customers_in_status_and_segment_with_the_segment_"
+"1-Low-Value","Active","284",138258.36649873786,"2.29550598124797930800"
+"1-Low-Value","Churned","12088",4203551.160829407,"97.70449401875202069200"
+"2-Medium-Value","Active","2196",6731353.965678884,"8.87523744089237360100"
+"2-Medium-Value","Churned","22547",59905097.821559474,"91.12476255910762639900"
+"3-High-Value","Active","1939",21833810.00316281,"15.67248625929518267100"
+"3-High-Value","Churned","10433",113595467.26233542,"84.32751374070481732900"
