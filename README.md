@@ -244,7 +244,7 @@ last_purchase_date[of customer] vs MAX(orderdate)[last_purchase_date_overall]
 ## 🚀 Strategic Recommendations
 
 ### 🎯 Improve Customer Retention
-- Focus on post-first purchase engagement  
+Focus on post-first purchase engagement to improve the involvement of customers after their first purchase.
 
 **Introduce:**
 - Loyalty programs  
@@ -253,7 +253,7 @@ last_purchase_date[of customer] vs MAX(orderdate)[last_purchase_date_overall]
 ---
 
 ### 📉 Improve Low-Value Customer Contribution
-- Enhance purchasing experience for low-value customers to increase their engagement and spending  
+Enhance purchasing experience for low-value customers to increase their user-engagement and spending.
 
 **Focus Areas:**
 - Simplify checkout and reduce friction  
@@ -264,7 +264,7 @@ last_purchase_date[of customer] vs MAX(orderdate)[last_purchase_date_overall]
 ---
 
 ### 💰 Maximize High-Value Customers
-- Identify and target high LTV customers  
+Identify and target high LTV customers  
 
 **Offer:**
 - Exclusive deals  
@@ -273,7 +273,7 @@ last_purchase_date[of customer] vs MAX(orderdate)[last_purchase_date_overall]
 ---
 
 ### 🔁 Reduce Churn
-- Re-engage churned users through:
+ Re-engage churned users through:
 
 - Email campaigns  
 - Discounts  
@@ -282,7 +282,7 @@ last_purchase_date[of customer] vs MAX(orderdate)[last_purchase_date_overall]
 ---
 
 ### 📊 Optimize First Purchase Experience
-- Since most revenue comes early:
+ Since most revenue comes early :
 
 - Improve onboarding  
 - Optimize first purchase journey  
